@@ -25,7 +25,7 @@ def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, 
     itr = 1
     if no_rows > batch_sz:
         itr = int((no_rows / batch_sz) + 1)
-    print('Total number of iterations : %s' % str(itr))
+    print('Total number of iterations : %d' % itr)
 
     select_sql = 'select %s from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
                  % (select_str, schema, table_name, sd, ed)
@@ -58,7 +58,7 @@ def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
         values_lst.append(values)
 
     dest = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    psycopg2.extras.execute_values(dest, insert_sql + ' %s', values_lst, template=None, page_size=10000)
+    psycopg2.extras.execute_values(dest, insert_sql + ' %s', values_lst, template=None, page_size=1000)
     destination.commit()
     dest.close()
 
@@ -107,11 +107,11 @@ def main():
 
 if __name__ == "__main__":
     try:
-        start_time = datetime.datetime.utcnow()
+        st = datetime.datetime.utcnow()
         main()
-        end_time = datetime.datetime.utcnow()
+        et = datetime.datetime.utcnow()
         print('Start time : %s\nEnd time : %s'
-              % (start_time.strftime('%Y-%m-%d 00:00:00'), end_time.strftime('%Y-%m-%d 00:00:00')))
+              % (st.strftime('%Y-%m-%d %H:%M:%S'), et.strftime('%Y-%m-%d %H:%M:%S')))
         exit(0)
     except Exception as ex:
         traceback.print_exc(ex)
