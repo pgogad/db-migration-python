@@ -2,7 +2,8 @@ import json
 
 import psycopg2
 import psycopg2.extras
-from db_connections import source, destination
+
+from db_connections import source, destination, logger
 
 
 def disable_triggers(schema_name, table_name):
@@ -32,6 +33,7 @@ def get_primary_key(table_name):
     lst = list()
     for row in rows:
         lst.append(row['col_name'])
+    logger.debug('%s' % ",".join(lst))
     return ",".join(lst)
 
 
@@ -39,6 +41,7 @@ def get_mapping(filename):
     with open(filename, 'r') as mapping:
         data = json.load(mapping)
         mapping.close()
+    logger.debug('%s' % json.dumps(data))
     return data
 
 
@@ -54,6 +57,7 @@ def create_insert_part(destination_schema, destination_table, col_type, mapping)
         else:
             key_lst.append(key)
     sql = sql % (destination_schema, destination_table, ','.join(key_lst))
+    logger.debug('%s' % sql)
     return sql, key_lst
 
 

@@ -6,7 +6,7 @@ import psycopg2
 import psycopg2.extras
 
 from common_utils import get_mapping, get_primary_key, get_type, create_value_map, evaluate_val, disable_triggers, \
-    enable_triggers, create_insert_part
+    enable_triggers, create_insert_part, logger
 from db_connections import source, destination, cfg, base_dir
 
 
@@ -18,14 +18,14 @@ def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, 
     cur.execute(sql_count)
     results = cur.fetchone()
     no_rows = results['count']
-    print('Total records found %d' % no_rows)
+    logger.info('Total records found %d' % no_rows)
     cur.close()
 
     batch_sz = int(cfg['source']['batch'])
     itr = 1
     if no_rows > batch_sz:
         itr = int((no_rows / batch_sz) + 1)
-    print('Total number of iterations : %d' % itr)
+    logger.info('Total number of iterations : %d' % itr)
 
     select_sql = 'select %s from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
                  % (select_str, schema, table_name, sd, ed)
@@ -35,13 +35,13 @@ def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, 
 
 
 def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
-    print('Iteration number %d' % (i + 1))
+    logger.info('Iteration number %d' % (i + 1))
     batch_sz = int(cfg['source']['batch'])
     offset = int(i * batch_sz)
     upper_limit = offset + batch_sz
     sql_select = 'select * from (%s) x where ROW_NUMBER > %s and ROW_NUMBER <= %s' \
                  % (select_sql, str(offset), str(upper_limit))
-    print(sql_select)
+    logger.info(sql_select)
     cur = source.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(sql_select)
     rows = cur.fetchall()
@@ -86,7 +86,7 @@ def count_down(dschema, dtable, schema, table_name, sd, ed):
     while current <= end_date:
         sd = current.strftime('%Y-%m-%d 00:00:00')
         ed = current.strftime('%Y-%m-%d 23:59:59')
-        print('Processing from %s to %s' % (sd, ed))
+        logger.info('Processing from %s to %s' % (sd, ed))
         create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst, sd, ed)
         current += datetime.timedelta(days=1)
 
@@ -110,8 +110,8 @@ if __name__ == "__main__":
         st = datetime.datetime.utcnow()
         main()
         et = datetime.datetime.utcnow()
-        print('Start time : %s\nEnd time : %s'
-              % (st.strftime('%Y-%m-%d %H:%M:%S'), et.strftime('%Y-%m-%d %H:%M:%S')))
+        logger.info('Start time : %s' % st.strftime('%Y-%m-%d %H:%M:%S'))
+        logger.info('End time : %s' % et.strftime('%Y-%m-%d %H:%M:%S'))
         exit(0)
     except Exception as ex:
         traceback.print_exc(ex)

@@ -7,3 +7,4 @@ docker/
 rabbitmq/
 receiver/
 src/__pycache__/
+migration.log

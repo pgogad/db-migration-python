@@ -2,11 +2,18 @@ import psycopg2.extras
 import yaml
 import os
 import traceback
+import logging.handlers
 
 from sshtunnel import SSHTunnelForwarder
 
+LOG_FILENAME = 'migration.log'
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)
+handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=1024 * 1024, backupCount=5)
+logger.addHandler(handler)
+
 base_dir = os.path.dirname(__file__)
-print(base_dir)
+logger.debug(base_dir)
 
 try:
     with open(base_dir + "/conf/config.yml", 'r') as yml_file:
@@ -31,7 +38,6 @@ try:
 except Exception as ex:
     traceback.print_exc(ex)
     exit(1)
-
 
 # def close_tunnel():
 #     if tunnel.is_alive:
