@@ -1,0 +1,17 @@
+source:
+  host: 192.168.109.12
+  port: 5432
+  username: openerp
+  password: A6eC9qf0AenECZdh
+  database: Portal_prod
+  batch: 100000
+destination:
+  ssh:
+    host: 52.60.113.32
+    user: ubuntu
+    pkey: /Users/pawan/techadmin.pem
+  db:
+    user: postgres
+    password: test
+    database: postgres
+    schema: public

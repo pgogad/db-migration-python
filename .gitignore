@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/
+db-migration-python.iml
+.DS_Store
+fs/
+docker/
+rabbitmq/
+receiver/

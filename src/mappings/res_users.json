@@ -1,0 +1,14 @@
+{
+  "login": "login",
+  "action_id": "action_id",
+  "company_id": "company_id",
+  "context_lang": "lang",
+  "context_tz": "tz",
+  "date": "create_date",
+  "id": "id",
+  "active": "active",
+  "name": "name",
+  "password": "password",
+  "signature": "signature",
+  "user_email": "email"
+}
