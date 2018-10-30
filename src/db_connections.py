@@ -19,18 +19,18 @@ try:
     with open(base_dir + "/conf/config.yml", 'r') as yml_file:
         cfg = yaml.load(yml_file)
 
-    # tunnel = SSHTunnelForwarder((cfg['destination']['ssh']['host'], 22), ssh_username=cfg['destination']['ssh']['user'],
-    #                             ssh_private_key=cfg['destination']['ssh']['pkey'],
-    #                             remote_bind_address=('localhost', 5432),
-    #                             local_bind_address=('localhost', 6543))
-    # tunnel.start()
-    # destination = psycopg2.connect(database=cfg['destination']['db']['database'], user=cfg['destination']['db']['user'],
-    #                                password=cfg['destination']['db']['password'], host=tunnel.local_bind_host,
-    #                                port=tunnel.local_bind_port)
-
+    tunnel = SSHTunnelForwarder((cfg['destination']['ssh']['host'], 22), ssh_username=cfg['destination']['ssh']['user'],
+                                ssh_private_key=base_dir + cfg['destination']['ssh']['pkey'],
+                                remote_bind_address=('localhost', 5432),
+                                local_bind_address=('localhost', 6543))
+    tunnel.start()
     destination = psycopg2.connect(database=cfg['destination']['db']['database'], user=cfg['destination']['db']['user'],
-                                   password=cfg['destination']['db']['password'], host='localhost',
-                                   port=5433)
+                                   password=cfg['destination']['db']['password'], host=tunnel.local_bind_host,
+                                   port=tunnel.local_bind_port)
+
+    # destination = psycopg2.connect(database=cfg['destination']['db']['database'], user=cfg['destination']['db']['user'],
+    #                                password=cfg['destination']['db']['password'], host='localhost',
+    #                                port=5433)
 
     source = psycopg2.connect(host=cfg['source']['host'], database=cfg['source']['database'],
                               user=cfg['source']['username'], password=cfg['source']['password'],

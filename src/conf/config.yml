@@ -9,9 +9,9 @@ destination:
   ssh:
     host: 52.60.113.32
     user: ubuntu
-    pkey: /Users/pawan/techadmin.pem
+    pkey: /conf/delmar_aws_key.pem
   db:
-    user: postgres
-    password: test
-    database: postgres
+    user: odoo
+    password: odoo
+    database: delmar-final-import
     schema: public
