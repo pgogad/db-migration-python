@@ -7,7 +7,7 @@ import psycopg2.extras
 
 from common_utils import get_mapping, get_primary_key, get_type, create_value_map, evaluate_val, disable_triggers, \
     enable_triggers, create_insert_part, logger
-from db_connections import source, destination, cfg, base_dir
+from db_connections import source, destination, cfg, base_dir, close_tunnel
 
 
 def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst, sd, ed):
@@ -119,5 +119,4 @@ if __name__ == "__main__":
     finally:
         destination.close()
         source.close()
-        # if tunnel.is_alive:
-        #     tunnel.stop()
+        close_tunnel()

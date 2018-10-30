@@ -39,6 +39,7 @@ except Exception as ex:
     traceback.print_exc(ex)
     exit(1)
 
-# def close_tunnel():
-#     if tunnel.is_alive:
-#         tunnel.close()
+
+def close_tunnel():
+    if tunnel.is_alive:
+        tunnel.close()
