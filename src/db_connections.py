@@ -23,8 +23,7 @@ try:
                                 ssh_private_key=base_dir + cfg['destination']['ssh']['pkey'],
                                 remote_bind_address=('localhost', 5432),
                                 local_bind_address=('localhost', 6543))
-    if not tunnel.is_alive():
-        tunnel.start()
+    tunnel.start()
 
     destination = psycopg2.connect(database=cfg['destination']['db']['database'], user=cfg['destination']['db']['user'],
                                    password=cfg['destination']['db']['password'], host=tunnel.local_bind_host,
@@ -43,5 +42,4 @@ except Exception as ex:
 
 
 def close_tunnel():
-    if tunnel.is_alive:
-        tunnel.close()
+    tunnel.close()
