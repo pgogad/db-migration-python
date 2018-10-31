@@ -10,7 +10,8 @@ from common_utils import get_mapping, get_primary_key, get_type, create_value_ma
 from db_connections import source, destination, cfg, base_dir, close_tunnel
 
 
-def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst, sd, ed):
+def create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst,
+                        sd, ed):
     sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
                 % (schema, table_name, sd, ed)
 
@@ -32,6 +33,19 @@ def create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, 
 
     for i in range(itr):
         task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql)
+
+    sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
+                % (dschema, dtable, sd, ed)
+
+    cur = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(sql_count)
+    results = cur.fetchone()
+    dest_no_rows = results['count']
+    cur.close()
+    logger.info('Total records inserted %d' % dest_no_rows)
+
+    if dest_no_rows != no_rows:
+        logger.error('Missing %d records for %s' % (no_rows - dest_no_rows, sd))
 
 
 def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
@@ -57,15 +71,18 @@ def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
                 values = values + (evaluate_val(col_type_dest, key, None),)
         values_lst.append(values)
 
-    dest = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    psycopg2.extras.execute_values(dest, insert_sql + ' %s', values_lst, template=None, page_size=1000)
-    destination.commit()
-    dest.close()
+    try:
+        dest = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        psycopg2.extras.execute_values(dest, insert_sql + ' %s', values_lst, template=None, page_size=1000)
+        destination.commit()
+        dest.close()
+    except Exception as ex:
+        logger.error(ex)
 
 
 def count_down(dschema, dtable, schema, table_name, sd, ed):
-    start_date = datetime.datetime.strptime('%s 00:00:00' % sd, '%Y-%m-%d %H:%M:%S')
-    end_date = datetime.datetime.strptime('%s 23:59:59' % ed, '%Y-%m-%d %H:%M:%S')
+    start_date = datetime.datetime.strptime('%s 00:00:00.000000' % sd, '%Y-%m-%d %H:%M:%S.%f')
+    end_date = datetime.datetime.strptime('%s 23:59:59.999999' % ed, '%Y-%m-%d %H:%M:%S.%f')
     current = start_date
 
     file = "%s/mappings/%s.json" % (base_dir, table_name)
@@ -84,10 +101,11 @@ def count_down(dschema, dtable, schema, table_name, sd, ed):
     insert_sql, key_lst = create_insert_part(dschema, dtable, col_type_dest, mapping)
 
     while current <= end_date:
-        sd = current.strftime('%Y-%m-%d 00:00:00')
-        ed = current.strftime('%Y-%m-%d 23:59:59')
+        sd = current.strftime('%Y-%m-%d 00:00:00.000000')
+        ed = current.strftime('%Y-%m-%d 23:59:59.999999')
         logger.info('Processing from %s to %s' % (sd, ed))
-        create_batch_insert(schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst, sd, ed)
+        create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, select_str, mapping, insert_sql,
+                            key_lst, sd, ed)
         current += datetime.timedelta(days=1)
 
 
@@ -110,8 +128,8 @@ if __name__ == "__main__":
         st = datetime.datetime.utcnow()
         main()
         et = datetime.datetime.utcnow()
-        logger.info('Start time : %s' % st.strftime('%Y-%m-%d %H:%M:%S'))
-        logger.info('End time : %s' % et.strftime('%Y-%m-%d %H:%M:%S'))
+        logger.info('Start time : %s' % st.strftime('%Y-%m-%d %H:%M:%S.%f'))
+        logger.info('End time : %s' % et.strftime('%Y-%m-%d %H:%M:%S.%f'))
         exit(0)
     except Exception as ex:
         traceback.print_exc(ex)
