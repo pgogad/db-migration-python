@@ -12,7 +12,12 @@ from db_connections import source, destination, cfg, base_dir, close_tunnel
 
 def create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst,
                         sd, ed):
-    sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
+    end_date = datetime.datetime.strptime(ed, '%Y-%m-%d %H:%M:%S.%f')
+    end_date += datetime.timedelta(days=1)
+
+    ed = datetime.datetime.strftime(end_date, '%Y-%m-%d 00:00:00.000000')
+
+    sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date < \'%s\'' \
                 % (schema, table_name, sd, ed)
 
     cur = source.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -28,13 +33,13 @@ def create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, sele
         itr = int((no_rows / batch_sz) + 1)
     logger.info('Total number of iterations : %d' % itr)
 
-    select_sql = 'select %s from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
+    select_sql = 'select %s from %s.%s where create_date >= \'%s\' and create_date < \'%s\'' \
                  % (select_str, schema, table_name, sd, ed)
 
     for i in range(itr):
         task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql)
 
-    sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date <= \'%s\'' \
+    sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date < \'%s\'' \
                 % (dschema, dtable, sd, ed)
 
     cur = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
