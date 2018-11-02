@@ -1,0 +1,118 @@
+{
+  "code": {
+    "col": "code",
+    "with_comma": false
+  },
+  "country_id": {
+    "col": "country_id",
+    "with_comma": false
+  },
+  "create_date": {
+    "col": "create_date",
+    "with_comma": false
+  },
+  "create_uid": {
+    "col": "create_uid",
+    "with_comma": true
+  },
+  "default": {
+    "col": "default",
+    "with_comma": true
+  },
+  "id": {
+    "col": "id",
+    "with_comma": true
+  },
+  "incoming_code": {
+    "col": "incoming_code",
+    "with_comma": false
+  },
+  "insurance": {
+    "col": "insurance",
+    "with_comma": false
+  },
+  "is_po_box": {
+    "col": "is_po_box",
+    "with_comma": false
+  },
+  "not_ss_signature": {
+    "col": "not_ss_signature",
+    "with_comma": false
+  },
+  "order_type": {
+    "col": "order_type",
+    "with_comma": false
+  },
+   "outgoing_code": {
+    "col": "outgoing_code",
+    "with_comma": false
+  },
+   "priority": {
+    "col": "priority",
+    "with_comma": false
+  },
+   "product_id": {
+    "col": "product_id",
+    "with_comma": false
+  },
+   "received_from": {
+    "col": "received_from",
+    "with_comma": false
+  },
+   "received_to": {
+    "col": "received_to",
+    "with_comma": false
+  },
+   "service_id": {
+    "col": "service_id",
+    "with_comma": false
+  },
+   "shipped_from": {
+    "col": "shipped_from",
+    "with_comma": false
+  },
+   "shipped_to": {
+    "col": "shipped_to",
+    "with_comma": false
+  },
+   "shipping_handling": {
+    "col": "shipping_handling",
+    "with_comma": false
+  },
+   "signature_level": {
+    "col": "signature_level",
+    "with_comma": false
+  },
+   "so_provider": {
+    "col": "so_provider",
+    "with_comma": false
+  },
+   "tag_id": {
+    "col": "priority",
+    "with_comma": false
+  },
+   "type_id": {
+    "col": "type_id",
+    "with_comma": false
+  },
+   "value_from": {
+    "col": "value_from",
+    "with_comma": false
+  },
+   "value_to": {
+    "col": "value_to",
+    "with_comma": false
+  },
+   "warehouse_id": {
+    "col": "warehouse_id",
+    "with_comma": false
+  },
+   "write_date": {
+    "col": "write_date",
+    "with_comma": false
+  },
+   "write_uid": {
+    "col": "write_uid",
+    "with_comma": false
+  }
+}

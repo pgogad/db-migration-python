@@ -1,10 +1,9 @@
-import argparse
-import datetime
 import traceback
-
+from datetime import datetime
+from datetime import timedelta
 import psycopg2
 import psycopg2.extras
-
+from argument_list import bulk_src_schema_name, bulk_dest_schema_name, bulk_src_dest_table_name, start_date, end_date
 from common_utils import get_mapping, get_primary_key, get_type, create_value_map, evaluate_val, disable_triggers, \
     enable_triggers, create_insert_part, logger
 from db_connections import source, destination, cfg, base_dir, close_tunnel
@@ -12,10 +11,8 @@ from db_connections import source, destination, cfg, base_dir, close_tunnel
 
 def create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, select_str, mapping, insert_sql, key_lst,
                         sd, ed):
-    end_date = datetime.datetime.strptime(ed, '%Y-%m-%d %H:%M:%S.%f')
-    end_date += datetime.timedelta(days=1)
-
-    ed = datetime.datetime.strftime(end_date, '%Y-%m-%d 00:00:00.000000')
+    end_time = datetime.strptime(ed, '%Y-%m-%d %H:%M:%S.%f') + timedelta(days=1)
+    ed = datetime.strftime(end_time, '%Y-%m-%d 00:00:00.000000')
 
     sql_count = 'select count(*) from %s.%s where create_date >= \'%s\' and create_date < \'%s\'' \
                 % (schema, table_name, sd, ed)
@@ -86,8 +83,8 @@ def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
 
 
 def count_down(dschema, dtable, schema, table_name, sd, ed):
-    start_date = datetime.datetime.strptime('%s 00:00:00.000000' % sd, '%Y-%m-%d %H:%M:%S.%f')
-    end_date = datetime.datetime.strptime('%s 23:59:59.999999' % ed, '%Y-%m-%d %H:%M:%S.%f')
+    start_date = datetime.strptime('%s 00:00:00.000000' % sd, '%Y-%m-%d %H:%M:%S.%f')
+    end_date = datetime.strptime('%s 23:59:59.999999' % ed, '%Y-%m-%d %H:%M:%S.%f')
     current = start_date
 
     file = "%s/mappings/%s.json" % (base_dir, table_name)
@@ -96,11 +93,11 @@ def count_down(dschema, dtable, schema, table_name, sd, ed):
     pk = get_primary_key(table_name)
     lst = list()
     for key in mapping.keys():
-        if mapping[key]['with_comma']:
-            lst.append('"%s"' % key)
-        else:
-            lst.append(key)
-    lst.append('ROW_NUMBER() OVER(ORDER BY %s)' % pk)
+        new_key = key.join('""')
+        new_key = new_key.replace('\'', '')
+        lst.append(new_key)
+    if pk:
+        lst.append('ROW_NUMBER() OVER(ORDER BY %s)' % pk)
     select_str = ",".join(lst)
 
     insert_sql, key_lst = create_insert_part(dschema, dtable, col_type_dest, mapping)
@@ -111,30 +108,24 @@ def count_down(dschema, dtable, schema, table_name, sd, ed):
         logger.info('Processing from %s to %s' % (sd, ed))
         create_batch_insert(dschema, dtable, schema, table_name, col_type_dest, select_str, mapping, insert_sql,
                             key_lst, sd, ed)
-        current += datetime.timedelta(days=1)
+        current += timedelta(days=1)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Script for migrating data")
-    parser.add_argument('-s', help="Source schema name", default='public')
-    parser.add_argument('-t', help="Source table name", default='stock_inventory_line')
-    parser.add_argument('-ds', help="Destination schema name", default='public')
-    parser.add_argument('-dt', help="Destination schema name", default='stock_inventory_line')
-    parser.add_argument('-sd', help="Start date in format 'YYYY-MM-dd'", default='2016-06-17')
-    parser.add_argument('-ed', help="End date in format 'YYYY-MM-dd'", default='2016-06-30')
-    arguments = parser.parse_args()
-    disable_triggers(arguments.ds, arguments.dt)
-    count_down(arguments.ds, arguments.dt, arguments.s, arguments.t, arguments.sd, arguments.ed)
-    enable_triggers(arguments.ds, arguments.dt)
+    script_start_time = datetime.now()
+    logger.info("########################################################################################")
+    logger.info('Migration Started For : %s' % bulk_src_dest_table_name)
+    disable_triggers(bulk_dest_schema_name, bulk_src_dest_table_name)
+    count_down(bulk_dest_schema_name, bulk_src_dest_table_name, bulk_src_schema_name,
+               bulk_src_dest_table_name, start_date, end_date)
+    enable_triggers(bulk_dest_schema_name, bulk_src_dest_table_name)
+    logger.info('Migration Completed For : %s And Duration of Execution was $s'
+                % bulk_src_dest_table_name, (datetime.now() - script_start_time))
 
 
 if __name__ == "__main__":
     try:
-        st = datetime.datetime.utcnow()
         main()
-        et = datetime.datetime.utcnow()
-        logger.info('Start time : %s' % st.strftime('%Y-%m-%d %H:%M:%S.%f'))
-        logger.info('End time : %s' % et.strftime('%Y-%m-%d %H:%M:%S.%f'))
         exit(0)
     except Exception as ex:
         traceback.print_exc(ex)
