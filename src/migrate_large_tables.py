@@ -83,9 +83,8 @@ def task(i, select_sql, mapping, key_lst, col_type_dest, insert_sql):
 
 
 def count_down(dschema, dtable, schema, table_name, sd, ed):
-    start_date = datetime.strptime('%s 00:00:00.000000' % sd, '%Y-%m-%d %H:%M:%S.%f')
-    end_date = datetime.strptime('%s 23:59:59.999999' % ed, '%Y-%m-%d %H:%M:%S.%f')
-    current = start_date
+    end_time = datetime.strptime('%s 23:59:59.999999' % ed, '%Y-%m-%d %H:%M:%S.%f')
+    current = datetime.strptime('%s 00:00:00.000000' % sd, '%Y-%m-%d %H:%M:%S.%f')
 
     file = "%s/mappings/%s.json" % (base_dir, table_name)
     mapping = get_mapping(file)
@@ -102,7 +101,7 @@ def count_down(dschema, dtable, schema, table_name, sd, ed):
 
     insert_sql, key_lst = create_insert_part(dschema, dtable, col_type_dest, mapping)
 
-    while current <= end_date:
+    while current <= end_time:
         sd = current.strftime('%Y-%m-%d 00:00:00.000000')
         ed = current.strftime('%Y-%m-%d 23:59:59.999999')
         logger.info('Processing from %s to %s' % (sd, ed))
