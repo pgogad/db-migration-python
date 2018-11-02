@@ -28,14 +28,14 @@ def create_batch_insert(destination_schema, destination_table, schema_name, tabl
     cur.execute(sql_count)
     results = cur.fetchone()
     no_rows = results['count']
-    logger.info('No of Rows : ' + '%s' % no_rows)
+    logger.info('No of Rows : %s' % str(no_rows))
     cur.close()
 
     batch_sz = int(cfg['source']['batch'])
     itr = 1
     if no_rows > batch_sz:
         itr = int((no_rows / batch_sz) + 1)
-    logger.info('No of iterations : ' + '%s' % str(itr))
+    logger.info('No of iterations : %s' % str(itr))
 
     sql, key_lst = create_insert_part(destination_schema, destination_table, col_type_dest, mapping)
     new_key_lst = []
