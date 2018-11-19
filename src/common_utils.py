@@ -128,7 +128,7 @@ def evaluate_val(col_type, key, value):
             return str(value)
         else:
             if col_type[key]['is_nullable'] == 'NO':
-                return ""
+                return "1971-01-01 00:00:00"
             else:
                 return None
     elif col_type[key]['data_type'] == 'bytea':
