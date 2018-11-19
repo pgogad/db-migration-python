@@ -1,4 +1,5 @@
 import json
+import re
 
 import psycopg2
 import psycopg2.extras
@@ -46,7 +47,9 @@ def get_mapping(filename):
 
 
 def check_case(incoming):
-    return any(letter.isupper() for letter in incoming)
+    pattern = re.compile('[A-Za-z_]*')
+    return pattern.match(incoming)
+    # return any(letter.isupper() for letter in incoming)
 
 
 def create_insert_part(destination_schema, destination_table, col_type, mapping):
@@ -165,7 +168,7 @@ def create_value_map(mapping, row):
     value_map = dict()
     for key in row.keys():
         if key in mapping.keys():
-            if check_case(key):
+            if check_case(mapping[key]):
                 value_map['"%s"' % mapping[key]] = row[key]
             else:
                 value_map[mapping[key]] = row[key]
