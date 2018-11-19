@@ -45,12 +45,16 @@ def get_mapping(filename):
     return data
 
 
+def check_case(incoming):
+    return any(letter.isupper() for letter in incoming)
+
+
 def create_insert_part(destination_schema, destination_table, col_type, mapping):
     sql = 'INSERT INTO %s.%s(%s) VALUES'
     key_lst = list()
     for key in col_type:
         if key in mapping.keys():
-            if mapping[key]['with_comma']:
+            if check_case(key):
                 key_lst.append('"%s"' % key)
             else:
                 key_lst.append(key)
@@ -108,7 +112,7 @@ def evaluate_val(col_type, key, value):
             return str(value)
         else:
             if col_type[key]['is_nullable'] == 'NO':
-                return ""
+                return "1971-01-01 00:00:00"
             else:
                 return None
     elif col_type[key]['data_type'] == 'numeric':
@@ -161,8 +165,8 @@ def create_value_map(mapping, row):
     value_map = dict()
     for key in row.keys():
         if key in mapping.keys():
-            if mapping[key]['with_comma']:
-                value_map['"%s"' % mapping[key]['col']] = row[key]
+            if check_case(key):
+                value_map['"%s"' % mapping[key]] = row[key]
             else:
-                value_map[mapping[key]['col']] = row[key]
+                value_map[mapping[key]] = row[key]
     return value_map

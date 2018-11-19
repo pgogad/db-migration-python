@@ -1,54 +1,15 @@
 {
-  "create_date": {
-    "col": "create_date",
-    "with_comma": false
-  },
-  "create_uid": {
-    "col": "create_uid",
-    "with_comma": false
-  },
-  "id": {
-    "col": "id",
-    "with_comma": false
-  },
-  "location_id": {
-    "col": "location_id",
-    "with_comma": false
-  },
-  "new_quantity": {
-    "col": "new_quantity",
-    "with_comma": false
-  },
-  "product_id": {
-    "col": "product_id",
-    "with_comma": false
-  },
-  "write_date": {
-    "col": "write_date",
-    "with_comma": false
-  },
-  "write_uid": {
-    "col": "write_uid",
-    "with_comma": false
-  },
-  "bin": {
-    "col": "bin",
-    "with_comma": false
-  },
-  "bin_id": {
-    "col": "bin_id",
-    "with_comma": false
-  },
-  "selected_reason": {
-    "col": "selected_reason",
-    "with_comma": false
-  },
-  "size_id": {
-    "col": "size_id",
-    "with_comma": false
-  },
-  "size_ids": {
-    "col": "size_ids",
-    "with_comma": false
-  }
+  "create_date": "create_date",
+  "create_uid": "create_uid",
+  "id": "id",
+  "location_id": "location_id",
+  "new_quantity": "new_quantity",
+  "product_id": "product_id",
+  "write_date": "write_date",
+  "write_uid": "write_uid",
+  "bin": "bin",
+  "bin_id": "bin_id",
+  "selected_reason": "selected_reason",
+  "size_id": "size_id",
+  "size_ids": "size_ids"
 }

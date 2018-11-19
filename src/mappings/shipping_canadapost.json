@@ -1,46 +1,13 @@
 {
-  "test": {
-    "col": "test",
-    "with_comma": false
-  },
-  "name": {
-    "col": "name",
-    "with_comma": false
-  },
-  "active": {
-    "col": "active",
-    "with_comma": false
-  },
-  "prodKey": {
-    "col": "prodKey",
-    "with_comma": true
-  },
-  "devKey": {
-    "col": "devKey",
-    "with_comma": true
-  },
-  "customerNumber": {
-    "col": "customerNumber",
-    "with_comma": true
-  },
-  "create_uid": {
-    "col": "create_uid",
-    "with_comma": false
-  },
-  "id": {
-    "col": "id",
-    "with_comma": false
-  },
-  "write_date": {
-    "col": "write_date",
-    "with_comma": false
-  },
-  "create_date": {
-    "col": "create_date",
-    "with_comma": false
-  },
-  "write_uid": {
-    "col": "write_uid",
-    "with_comma": false
-  }
+  "test": "test",
+  "name": "name",
+  "active": "active",
+  "prodKey": "prodKey",
+  "devKey": "devKey",
+  "customerNumber": "customerNumber",
+  "create_uid": "create_uid",
+  "id": "id",
+  "write_date": "write_date",
+  "create_date": "create_date",
+  "write_uid": "write_uid"
 }

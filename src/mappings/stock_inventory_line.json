@@ -1,62 +1,17 @@
 {
-  "id": {
-    "col": "id",
-    "with_comma": false
-  },
-  "create_uid": {
-    "col": "create_uid",
-    "with_comma": false
-  },
-  "create_date": {
-    "col": "create_date",
-    "with_comma": false
-  },
-  "write_date": {
-    "col": "write_date",
-    "with_comma": false
-  },
-  "write_uid": {
-    "col": "write_uid",
-    "with_comma": false
-  },
-  "product_id": {
-    "col": "product_id",
-    "with_comma": false
-  },
-  "product_uom": {
-    "col": "product_uom",
-    "with_comma": false
-  },
-  "prod_lot_id": {
-    "col": "prod_lot_id",
-    "with_comma": false
-  },
-  "company_id": {
-    "col": "company_id",
-    "with_comma": false
-  },
-  "inventory_id": {
-    "col": "inventory_id",
-    "with_comma": false
-  },
-  "product_qty": {
-    "col": "product_qty",
-    "with_comma": false
-  },
-  "location_id": {
-    "col": "location_id",
-    "with_comma": false
-  },
-  "size_id": {
-    "col": "size_id",
-    "with_comma": false
-  },
-  "bin": {
-    "col": "bin",
-    "with_comma": false
-  },
-  "bin_id": {
-    "col": "bin_id",
-    "with_comma": false
-  }
+  "id": "id",
+  "create_uid": "create_uid",
+  "create_date": "create_date",
+  "write_date": "write_date",
+  "write_uid": "write_uid",
+  "product_id": "product_id",
+  "product_uom": "product_uom",
+  "prod_lot_id": "prod_lot_id",
+  "company_id": "company_id",
+  "inventory_id": "inventory_id",
+  "product_qty": "product_qty",
+  "location_id": "location_id",
+  "size_id": "size_id",
+  "bin": "bin",
+  "bin_id": "bin_id"
 }
