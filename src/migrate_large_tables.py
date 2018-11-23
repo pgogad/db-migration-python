@@ -121,7 +121,7 @@ def migrate_process(ds, dt, s, t, sd, ed):
     count_down(ds, dt, s, t, sd, ed)
     enable_triggers(ds, dt)
 
-    logger.info('Migration Completed For : %s And Duration of Execution was $s'
+    logger.info('Migration Completed For : %s And Duration of Execution was %s'
                 % (dt, (datetime.now() - script_start_time)))
 
 
@@ -141,7 +141,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-        exit(0)
     except Exception as ex:
         traceback.print_exc(ex)
         exit(1)
@@ -149,3 +148,4 @@ if __name__ == "__main__":
         destination.close()
         source.close()
         close_tunnel()
+    exit(0)

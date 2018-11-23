@@ -46,7 +46,7 @@ def create_batch_insert(destination_schema, destination_table, schema_name, tabl
         logger.info('Iteration number %d' % (i + 1))
         offset = int(i * batch_sz)
         upper_limit = offset + batch_sz
-        inner = 'select %s from %s.%s where trans_id != 63' % (select_str, schema_name, table_name)
+        inner = 'select %s from %s.%s' % (select_str, schema_name, table_name)
 
         select_sql = 'select * from (%s) X where ROW_NUMBER > %s and ROW_NUMBER <= %s' \
                      % (inner, str(offset), str(upper_limit))

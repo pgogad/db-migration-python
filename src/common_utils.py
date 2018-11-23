@@ -46,6 +46,10 @@ def get_mapping(filename):
 
 
 def check_case(incoming):
+    key_words = ['date', 'type', 'name']
+    if incoming in key_words:
+        return True
+
     return any(letter.isupper() for letter in incoming)
 
 
