@@ -1,13 +1,13 @@
 import traceback
+import argparse
 from datetime import datetime
 
 import psycopg2
 import psycopg2.extras
 
-from argument_list import src_dest_table_names, src_schema_name, dest_schema_name
 from common_utils import get_mapping, get_primary_key, get_type, create_value_map, evaluate_val, disable_triggers, \
-    enable_triggers, create_insert_part
-from db_connections import source, destination, cfg, base_dir, logger
+    enable_triggers, create_insert_part, check_case
+from db_connections import source, destination, cfg, base_dir, logger, close_tunnel
 
 
 def create_batch_insert(destination_schema, destination_table, schema_name, table_name):
@@ -17,11 +17,15 @@ def create_batch_insert(destination_schema, destination_table, schema_name, tabl
     pk = get_primary_key(table_name)
     lst = list()
     for key in mapping:
-        new_key = key.join('""')
-        new_key = new_key.replace('\'', '')
+        new_key = key
+        if check_case(key):
+            new_key = '"%s"' % key
         lst.append(new_key)
     if pk:
         lst.append('ROW_NUMBER() OVER(ORDER BY %s)' % pk)
+    else:
+        lst.append('ROW_NUMBER()')
+
     select_str = ",".join(lst)
     sql_count = 'select count(*) from %s.%s' % (schema_name, table_name)
     cur = source.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -38,28 +42,25 @@ def create_batch_insert(destination_schema, destination_table, schema_name, tabl
     logger.info('No of iterations : %s' % str(itr))
 
     sql, key_lst = create_insert_part(destination_schema, destination_table, col_type_dest, mapping)
-    new_key_lst = []
-    for data in key_lst:
-        a = data.strip('"')
-        new_key_lst.append(a)
-
     for i in range(itr):
+        logger.info('Iteration number %d' % (i + 1))
         offset = int(i * batch_sz)
-        if pk:
-            sql_select = 'select %s from %s.%s order by ROW_NUMBER LIMIT %s OFFSET %s' \
-                         % (select_str, schema_name, table_name, cfg['source']['batch'], str(offset))
-        else:
-            sql_select = 'select %s from %s.%s LIMIT %s OFFSET %s' \
-                         % (select_str, schema_name, table_name, cfg['source']['batch'], str(offset))
+        upper_limit = offset + batch_sz
+        inner = 'select %s from %s.%s where trans_id != 63' % (select_str, schema_name, table_name)
+
+        select_sql = 'select * from (%s) X where ROW_NUMBER > %s and ROW_NUMBER <= %s' \
+                     % (inner, str(offset), str(upper_limit))
+
+        logger.info(select_sql)
         cur = source.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute(sql_select)
+        cur.execute(select_sql)
         rows = cur.fetchall()
         cur.close()
         values_lst = list()
         for row in rows:
             values = ()
             value_map = create_value_map(mapping, row)
-            for key in new_key_lst:
+            for key in key_lst:
                 if key in value_map.keys():
                     values = values + (evaluate_val(col_type_dest, key, value_map[key]),)
                 else:
@@ -75,22 +76,26 @@ def create_batch_insert(destination_schema, destination_table, schema_name, tabl
             logger.error(ex)
 
 
-def main():
+def migrate_process(ds, dt, s, t):
     script_start_time = datetime.now()
-    for table_name in src_dest_table_names:
-        logger.info("##########################################################################################")
-        logger.info('Migration Started For : %s' % table_name)
-        table_start_time = datetime.now()
-        disable_triggers(dest_schema_name, table_name)
-        create_batch_insert(dest_schema_name, table_name, src_schema_name, table_name)
-        enable_triggers(dest_schema_name, table_name)
-        logger.info('Migration Completed For : %s and Duration of Execution was %s'
-                    % (str(table_name), str(datetime.now() - table_start_time)))
+    logger.info("########################################################################################")
+    logger.info('Migration Started For : %s' % dt)
+    disable_triggers(ds, dt)
+    create_batch_insert(ds, dt, s, t)
+    enable_triggers(ds, dt)
+    logger.info('Migration Completed For : %s And Duration of Execution was %s'
+                % (dt, (datetime.now() - script_start_time)))
 
-    logger.info("##########################################################################################")
-    logger.info('*************************************')
-    logger.info('Total Execution Time : %s' % (datetime.now() - script_start_time))
-    logger.info('*************************************')
+
+def main():
+    parser = argparse.ArgumentParser(description="Script for migrating data")
+    parser.add_argument('-s', help="Source schema name", default='public')
+    parser.add_argument('-t', help="Source table name", default='stock_inventory_line')
+    parser.add_argument('-ds', help="Destination schema name", default='public')
+    parser.add_argument('-dt', help="Destination schema name", default='stock_inventory_line')
+    arguments = parser.parse_args()
+
+    migrate_process(arguments.ds, arguments.dt, arguments.s, arguments.t)
 
 
 if __name__ == "__main__":
@@ -103,3 +108,5 @@ if __name__ == "__main__":
     finally:
         destination.close()
         source.close()
+        close_tunnel()
+    exit(0)

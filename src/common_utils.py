@@ -1,5 +1,4 @@
 import json
-import re
 
 import psycopg2
 import psycopg2.extras
@@ -47,22 +46,24 @@ def get_mapping(filename):
 
 
 def check_case(incoming):
-    pattern = re.compile('[A-Za-z_]*')
-    return pattern.match(incoming)
-    # return any(letter.isupper() for letter in incoming)
+    return any(letter.isupper() for letter in incoming)
 
 
 def create_insert_part(destination_schema, destination_table, col_type, mapping):
     sql = 'INSERT INTO %s.%s(%s) VALUES'
     key_lst = list()
-    for key in col_type:
-        if key in mapping.keys():
+    for key in col_type:  # col_type is destination table column type
+        if key in mapping.keys():  # if key exists in mapping i.e. we need to map old data to new schema
+            if check_case(mapping[key]):
+                key_lst.append('"%s"' % mapping[key])
+            else:
+                key_lst.append(mapping[key])
+        else:  # If mapping does not exist in mapping it implies that this is a new column
             if check_case(key):
                 key_lst.append('"%s"' % key)
             else:
                 key_lst.append(key)
-        else:
-            key_lst.append(key)
+
     sql = sql % (destination_schema, destination_table, ','.join(key_lst))
     logger.debug('%s' % sql)
     return sql, key_lst
@@ -148,10 +149,10 @@ def evaluate_val(col_type, key, value):
 
 
 def get_type(schema_name, table_name):
-    cur = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE " \
+    sql = "SELECT column_name, data_type, is_nullable FROM INFORMATION_SCHEMA.COLUMNS WHERE " \
           "table_schema = '%s' AND table_name = '%s'" \
           % (schema_name, table_name)
+    cur = destination.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(sql)
     rows = cur.fetchall()
     cur.close()
