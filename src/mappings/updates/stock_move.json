@@ -1,0 +1,5 @@
+{
+  "sql": "select sm.id as id, sp.real_partner_id as real_partner_id, ROW_NUMBER() OVER(ORDER by sm.id) from stock_move sm left join stock_picking sp on sm.picking_id = sp.id where sm.picking_id is not null and sp.real_partner_id is not null",
+  "update": "update stock_move set real_partner_id = new_real_partner_id from (values %s) AS tmp(id, new_real_partner_id) WHERE tmp.id = stock_move.id",
+  "count": "select count(*) from stock_move sm left join stock_picking sp on sm.picking_id = sp.id where sm.picking_id is not null and sp.real_partner_id is not null"
+}

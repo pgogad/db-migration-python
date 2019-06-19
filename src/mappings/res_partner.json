@@ -25,7 +25,7 @@
   "is_fbc":"is_fbc",
   "is_sterling":"is_sterling",
   "lang":"lang",
-  "min_price":"min_cost",
+  "min_price":"min_price",
   "min_qty":"min_qty",
   "name":"name",
   "opt_out":"opt_out",

@@ -17,12 +17,11 @@ logger.debug(base_dir)
 
 try:
     with open(base_dir + "/conf/config.yml", 'r') as yml_file:
-        cfg = yaml.load(yml_file)
+        cfg = yaml.load(yml_file, Loader=yaml.FullLoader)
 
     tunnel = SSHTunnelForwarder((cfg['destination']['ssh']['host'], 22), ssh_username=cfg['destination']['ssh']['user'],
-                                ssh_private_key=base_dir + cfg['destination']['ssh']['pkey'],
-                                remote_bind_address=('localhost', 5432),
-                                local_bind_address=('localhost', 6543))
+                                ssh_password=cfg['destination']['ssh']['password'],
+                                remote_bind_address=('localhost', 5432), local_bind_address=('localhost', 6543))
     tunnel.start()
     destination = psycopg2.connect(database=cfg['destination']['db']['database'], user=cfg['destination']['db']['user'],
                                    password=cfg['destination']['db']['password'], host=tunnel.local_bind_host,

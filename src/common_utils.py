@@ -57,19 +57,22 @@ def create_insert_part(destination_schema, destination_table, col_type, mapping)
     sql = 'INSERT INTO %s.%s(%s) VALUES'
     key_lst = list()
     for key in col_type:  # col_type is destination table column type
+        if key in key_lst:
+            continue
         if key in mapping.keys():  # if key exists in mapping i.e. we need to map old data to new schema
             if check_case(mapping[key]):
                 key_lst.append('"%s"' % mapping[key])
             else:
                 key_lst.append(mapping[key])
         else:  # If mapping does not exist in mapping it implies that this is a new column
+            if key in key_lst:
+                continue
             if check_case(key):
                 key_lst.append('"%s"' % key)
             else:
                 key_lst.append(key)
 
     sql = sql % (destination_schema, destination_table, ','.join(key_lst))
-    logger.debug('%s' % sql)
     return sql, key_lst
 
 

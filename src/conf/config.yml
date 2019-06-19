@@ -7,11 +7,14 @@ source:
   batch: 100000
 destination:
   ssh:
-    host: 52.60.113.32
-    user: ubuntu
+    host: 192.168.109.17
+    user: delmar
     pkey: /conf/delmar_aws_key.pem
+    password: XCVawt766!
   db:
     user: odoo
     password: odoo
-    database: delmar-final-import
+    database: delta-feature-data-bkp
     schema: public
+
+#  ssh_private_key=base_dir + cfg['destination']['ssh']['pkey']
