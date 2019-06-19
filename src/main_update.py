@@ -45,8 +45,9 @@ def migrate_process(table_name):
         for row in rows:
             r = dict(row)
             del r['row_number']
-            q_str += '(%s, %s),'
-            q_params.extend([r['id'], r['real_partner_id']])
+            q_str += updates['placeholder']
+            for key in updates['keys']:
+                q_params.extend([r[key]])
         q_str = q_str[:-1]
 
         try:
